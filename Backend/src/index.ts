@@ -2,10 +2,24 @@ import express from "express";
 import userRouter from "./routes/user";
 import courseRouter from "./routes/course";
 import adminRouter from "./routes/admin";
-const app=express();
+import dotenv from "dotenv";
+import mongoose from "mongoose";
+import db from "./db"
+dotenv.config();
 
-app.use("/user",userRouter);
-app.use("/course",courseRouter);
-app.use("/admin",adminRouter);
+const app = express();
 
-app.listen(3000);
+app.use("/api/v1/user", userRouter);
+app.use("/api/v1/course", courseRouter);
+app.use("/api/v1/admin", adminRouter);
+
+const main = async () => {
+    await mongoose.connect(process.env.MONGODB_URI!);
+    await db.userModel.deleteOne({
+        email: "test@example.com"
+    });
+    app.listen(process.env.PORT);
+    console.log("Server and database running");
+}
+main();
+

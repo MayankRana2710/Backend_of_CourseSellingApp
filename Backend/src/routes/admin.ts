@@ -1,4 +1,5 @@
 import express,{Request,Response} from "express";
+import adminModel from "../db";
 const adminRouter=express.Router();
 
 adminRouter.post("/signup",(req:Request,res:Response)=>{
