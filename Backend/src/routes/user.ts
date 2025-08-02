@@ -1,16 +1,57 @@
-import express,{Request,Response} from "express";
+import express, { Request, Response } from "express";
+import db from "../db"
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 const userRouter = express.Router();
 
-userRouter.post("/signup",(req:Request,res:Response)=>{
-    res.json({message:"Signup"});
+userRouter.post("/signup", async (req: Request, res: Response) => {
+    const { email, password, firstName, lastName } = req.body;
+    try {
+        await db.userModel.create({
+            email,
+            password,
+            firstName,
+            lastName
+        })
+        return res.status(201).json({ message: "Signup successful" });
+    }
+    catch (err) {
+        console.error("Signup error:", err);
+        return res.status(500).json({ message: "Signup failed", error: err });
+    }
 })
 
-userRouter.post("/signin",(req:Request,res:Response)=>{
-    res.json({message:"Signin"});
+userRouter.post("/signin", async (req: Request, res: Response) => {
+    const { email, password } = req.body;
+    const jwtkey = process.env.JWT_USER_PASSWORD;
+    try {
+        const user = await db.userModel.findOne({
+            email: email,
+            password: password
+        })
+        if (!jwtkey) {
+            throw new Error("JWT secret is not defined");
+        }
+        if (user) {
+            const token = jwt.sign({ id: user._id }, jwtkey);
+            res.json({
+                token: token
+            })
+        } else {
+            res.status(403).json({
+                message: "Incorrect credentials"
+            });
+        }
+    }
+    catch (err) {
+        return res.status(500).json({ message: "Signin failed", error: err });
+    }
+
 })
 
-userRouter.get("/purchase",(req:Request,res:Response)=>{
-    res.json({message:"Purchased Courses"});
+userRouter.get("/purchase", (req: Request, res: Response) => {
+    res.json({ message: "Purchased Courses" });
 })
 
 export default userRouter;
