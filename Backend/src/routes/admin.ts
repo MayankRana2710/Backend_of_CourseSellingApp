@@ -50,7 +50,7 @@ adminRouter.post("/signin", async (req: Request, res: Response) => {
 })
 
 adminRouter.post("/course", adminMiddleware ,async (req: Request, res: Response) => {
-    const adminId=(req as any).userId;
+    const adminId=(req as any).userId; //signin karte time token se extracted admin ki ObjectId
     const {title,description ,price,imageURL}=req.body;
 
     const course=await db.courseModel.create({
@@ -62,16 +62,39 @@ adminRouter.post("/course", adminMiddleware ,async (req: Request, res: Response)
     })
     res.json({ 
         message: "Course created",
-        courseId:course._id
+        courseId: course._id  //jo poora course humne banaya hai, uski ObjectId
     });
 })
 
-adminRouter.put("/course", (req: Request, res: Response) => {
-    res.json({ message: "Admin signup" });
+adminRouter.put("/course", adminMiddleware, async (req: Request, res: Response) => {
+    const adminId=(req as any).userId;
+    const {title,description ,price,imageURL,courseId}=req.body;
+
+    const course=await db.courseModel.updateOne({
+        _id: courseId,
+        creatorId: adminId
+    },{
+        title,
+        description,
+        price,
+        imageURL,
+    })
+    res.json({ 
+        message: "Course updated",
+        courseId:(course as any)._id
+    });
 })
 
-adminRouter.get("/course/bulk", (req: Request, res: Response) => {
-    res.json({ message: "Admin signup" });
+adminRouter.get("/course/bulk", adminMiddleware, async (req: Request, res: Response) => {
+    const adminId=(req as any).userId;
+
+    const courses=await db.courseModel.find({
+        creatorId: adminId
+    })
+    res.json({ 
+        message: "Course you have purchased",
+        courses
+    });
 })
 
 export default adminRouter
