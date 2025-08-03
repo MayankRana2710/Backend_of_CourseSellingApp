@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import db from "../db";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
+import adminMiddleware from "../middleware/admin";
 dotenv.config();
 const adminRouter = express.Router();
 
@@ -48,8 +49,21 @@ adminRouter.post("/signin", async (req: Request, res: Response) => {
     }
 })
 
-adminRouter.post("/course", (req: Request, res: Response) => {
-    res.json({ message: "Admin posting course" });
+adminRouter.post("/course", adminMiddleware ,async (req: Request, res: Response) => {
+    const adminId=(req as any).userId;
+    const {title,description ,price,imageURL}=req.body;
+
+    const course=await db.courseModel.create({
+        title,
+        description,
+        price,
+        imageURL,
+        creatorId:adminId,
+    })
+    res.json({ 
+        message: "Course created",
+        courseId:course._id
+    });
 })
 
 adminRouter.put("/course", (req: Request, res: Response) => {
