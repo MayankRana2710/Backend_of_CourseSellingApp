@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import db from "../db"
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import userMiddleware from "../middleware/user";
 dotenv.config();
 const userRouter = express.Router();
 
@@ -50,8 +51,12 @@ userRouter.post("/signin", async (req: Request, res: Response) => {
 
 })
 
-userRouter.get("/purchase", (req: Request, res: Response) => {
-    res.json({ message: "Purchased Courses" });
+userRouter.get("/purchase", userMiddleware, async (req: Request, res: Response) => {
+    const userId=req.body.userId;
+    const purchases=await db.purchaseModel.find({
+        userId
+    })
+    res.json({ purchases });
 })
 
 export default userRouter;
