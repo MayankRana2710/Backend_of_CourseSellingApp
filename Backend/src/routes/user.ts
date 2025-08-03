@@ -56,7 +56,13 @@ userRouter.get("/purchase", userMiddleware, async (req: Request, res: Response) 
     const purchases=await db.purchaseModel.find({
         userId
     })
-    res.json({ purchases });
+    const coursesData=await db.courseModel.find({
+        _id:{ $in: purchases.map((x:any)=>x.courseId)}
+    });
+    res.json({ 
+        purchases,
+        coursesData
+    });
 })
 
 export default userRouter;

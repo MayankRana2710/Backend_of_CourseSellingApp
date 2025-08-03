@@ -5,7 +5,7 @@ const courseRouter=express.Router();
 
 courseRouter.get("preview", adminMiddleware, async (req:Request,res:Response)=>{
     const userId=req.body.userId;
-    const courseId=req.body.courseId
+    const courseId=req.body.courseId;
 
     await db.courseModel.create({
         userId,
